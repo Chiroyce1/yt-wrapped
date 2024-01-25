@@ -54,5 +54,28 @@ function createWrapped(file: File): void {
 		</details></div>
 	{/if}
   <Wrapped {data} />
-		<p id="output"></p>
+	<a href="https://github.com/Chiroyce1/yt-wrapped" target="_blank">
+		{#if window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches}
+			<img src="./github_dark.png" id="github" alt="View on GitHub">
+		{:else}
+			<img src="./github_light.png" id="github" alt="View on GitHub">
+		{/if}
+	</a>
 	</main>
+
+<style>
+	#github {
+  	position: fixed;
+    border-radius: 50%;
+  	right: 2em;
+  	top: 1em;
+  	height: 42px;
+  	margin: 1em;
+  	cursor: pointer;
+		transition: all 200ms;
+	}
+
+	#github:hover {
+		transform: scale(1.2);
+	}
+</style>
