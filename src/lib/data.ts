@@ -156,5 +156,5 @@ export function totalVideos(days: Days) {
 export function average(days: Days, duration: number) {
 	const totalVideosWatched = totalVideos(days);
 	// meh it works
-	return parseFloat((totalVideosWatched / duration).toLocaleString()).toFixed();
+	return parseInt((totalVideosWatched / duration).toFixed()).toLocaleString();
 }

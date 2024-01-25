@@ -16,8 +16,8 @@
 {#if data && stats}
   <p class="data title">You watched...</p>
   <p class="data">- a total of <span class="gradient blue">{totalVideos(data.days).toLocaleString()}</span> videos in {year}</p>
-  <p class="data">- an average of <span class="gradient yellow">{average(data.days, 365).toLocaleString()}</span> videos in a day</p>
-  <p class="data">- an average of <span class="gradient purple">{average(data.days, 12).toLocaleString()}</span> videos in a month</p>
+  <p class="data">- an average of <span class="gradient yellow">{average(data.days, 365)}</span> videos in a day</p>
+  <p class="data">- an average of <span class="gradient purple">{average(data.days, 12)}</span> videos in a month</p>
   <p class="data">- a whopping <span class="gradient red">{stats.mostWatchedMonthValue}</span> videos in <span class="gradient yellow">{stats.mostWatchedMonth}</span></p>
   <p class="data">- a monumental <span class="gradient yellow">{stats.mostWatchedDayValue}</span> videos on <span class="gradient red">{stats.mostWatchedDay}</span></p>
   <TopChannels topChannels={data.top} n={20} />
