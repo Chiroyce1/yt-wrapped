@@ -1,4 +1,10 @@
-import type { TopChannels, YouTubeVideo, Days, Video, MonthData } from "./types";
+import type {
+	TopChannels,
+	YouTubeVideo,
+	Days,
+	Video,
+	MonthData,
+} from "./types";
 
 export const year = 2023;
 
@@ -27,7 +33,7 @@ export function processData(videos: Array<YouTubeVideo>): {
 } {
 	const groupedByDate: Days = {};
 	let topChannels: TopChannels = {};
-	
+
 	videos.forEach((vid) => {
 		// Extract only the date part
 		const dateKey = vid.time.split("T")[0];
@@ -55,7 +61,7 @@ export function processData(videos: Array<YouTubeVideo>): {
 		} else {
 			topChannels[vidObj.channel] = {
 				channelURL: vidObj.channelURL,
-				videosWatched: 1
+				videosWatched: 1,
 			};
 		}
 		if (dateKey in groupedByDate) {
@@ -64,13 +70,12 @@ export function processData(videos: Array<YouTubeVideo>): {
 			groupedByDate[dateKey] = [vidObj];
 		}
 	});
-	
+
 	return {
 		days: groupedByDate,
 		top: sortTopChannels(topChannels),
 	};
 }
-
 
 const monthMap = {
 	"01": "January",
@@ -124,7 +129,7 @@ export function getStats(days: Days) {
 	for (let i = 0; i < dates.length; i++) {
 		if (videosPerDay[i] > maxDayValue) {
 			maxDayValue = videosPerDay[i];
-			maxDayKey = dates[i]
+			maxDayKey = dates[i];
 		}
 	}
 
@@ -132,11 +137,24 @@ export function getStats(days: Days) {
 		// @ts-ignore
 		mostWatchedMonth: monthMap[maxMonthKey],
 		mostWatchedMonthValue: maxMonthValue,
-		mostWatchedDay: new Date(maxDayKey).toLocaleDateString("en-US", {year: "numeric", month: "long", day: "numeric"}),
+		mostWatchedDay: new Date(maxDayKey).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		}),
 		mostWatchedDayValue: maxDayValue,
 		dates,
 		videosOverYear,
 		videosPerDay,
 	};
+}
 
+export function totalVideos(days: Days) {
+	return Object.values(days).reduce((sum, day) => sum + day.length, 0);
+}
+
+export function average(days: Days, duration: number) {
+	const totalVideosWatched = totalVideos(days);
+	// meh it works
+	return parseFloat((totalVideosWatched / duration).toLocaleString()).toFixed();
 }

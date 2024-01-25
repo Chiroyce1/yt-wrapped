@@ -1,25 +1,11 @@
 <script lang="ts">
-  import '../app.css'
-  import TopChannels from './components/TopChannels.svelte';
-	import type { Days, Stats } from './types';
-  import { getStats, year } from './data'
-  import Graph from './components/Graph.svelte';
+  import '../../app.css'
+  import TopChannels from './TopChannels.svelte';
+	import type { Stats } from '../types';
+  import { getStats, year, totalVideos, average } from '../data'
+  import Graph from './Graph.svelte';
 
   export let data: any | undefined;
-
-  function totalVideos(days: Days) {
-    return Object.values(days).reduce(
-      (sum, day) => sum + day.length,
-      0
-    );
-  }
-
-  function average(days: Days, duration: number) {
-    const totalVideosWatched = totalVideos(days);
-    return parseInt((totalVideosWatched / duration).toLocaleString()).toFixed();
-  }
-
-  let days: Days | undefined;
   let stats: Stats | undefined;
 
   $: if (data) {

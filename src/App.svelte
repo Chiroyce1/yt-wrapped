@@ -1,7 +1,7 @@
 <script lang="ts">
   import { year, filterVideos, processData } from "./lib/data";
   import type { Days, TopChannels } from "./lib/types";
-  import Wrapped from "./lib/Wrapped.svelte"
+  import Wrapped from "./lib/components/Wrapped.svelte"
 	
   let files: FileList;
   let data: {
@@ -19,7 +19,6 @@ function createWrapped(file: File): void {
 }
 
   $: if (files) {
-		// TODO: This is too reactive at the moment
     // https://svelte.dev/repl/file-inputs?version=4.2.9
     createWrapped(files[0])
 	}
@@ -48,7 +47,7 @@ function createWrapped(file: File): void {
 				<img src="./screenshots/only_history.png" class="tall" alt="(screenshot of the page)">
 				<li>Press "OK", then the blue "Next Step" button. <br>
 					Change the max file size to 4GB.</li>
-				<li>Wait for an email in your inbox that will let you know when is ready <br>It'll really only take 5 minutes. </li>
+				<li>Wait for an email in your inbox that will let you know when it's ready <br>It'll really only take 5 minutes. </li>
 				<li>Download the zip file from the link sent to your inbox, <br>and finally locate the
 					<code>watch-history.json</code> file <br><code>./Takeout/YouTube and YouTube Music/history/watch-history.json</code></li>
 			</ol>
