@@ -40,24 +40,9 @@
   <i><sub>Videos include #shorts but not videos or music played from music.youtube.com</sub></i>
   <br><br><br>
   <Graph {stats} />
-{:else}
-  <div class="placeholder">
-    <p>Your YouTube Wrapped will show up here!</p>
-  </div>
 {/if}
 
 <style>
-  .placeholder {
-    width: 100%;
-    height: 300px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 3px dotted var(--fg);
-    border-radius: 3px;
-    margin-top: 1em;
-  }
-
   p {
     margin: 0;
     font-weight: 300;
