@@ -6,8 +6,6 @@
 
 	const channelEntries = Object.entries(topChannels).slice(0, n);
 	const loadedMore = Object.entries(topChannels).slice(n, 200)
-	console.log(channelEntries);
-	console.log(loadedMore);
 	const pad = (x: number) => x <= 9 ? `0${x}` : x;
 </script>
 

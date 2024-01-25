@@ -10,6 +10,8 @@
 
   $: if (data) {
 	  stats = getStats(data.days);
+    console.log(data);
+    console.log(stats);
   }
 </script>
 

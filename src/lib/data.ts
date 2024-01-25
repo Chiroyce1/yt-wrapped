@@ -20,8 +20,14 @@ export function sortTopChannels(obj: TopChannels): TopChannels {
 
 export function filterVideos(vids: Array<YouTubeVideo>): Array<YouTubeVideo> {
 	return vids.filter((obj) => {
-		if (!obj.titleUrl) return false;
-		if (obj.titleUrl.includes("music.youtube.com")) return false;
+		// If it wasn't a watched video
+		if (!obj.activityControls?.includes("YouTube watch history")) return false;
+		// Some takeouts don't contain the titleUrl for some reason so
+		// Just make sure it isn't from music.youtube.com IF we have the field
+		if (obj.titleUrl) {
+			if (obj.titleUrl.includes("music.youtube.com")) return false;
+		}
+		// Not from {year}? BYE BYE
 		if (!(new Date(obj.time).getFullYear() === year)) return false;
 		return true;
 	});
