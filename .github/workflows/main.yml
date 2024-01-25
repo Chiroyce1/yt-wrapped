@@ -10,6 +10,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -25,19 +28,20 @@ jobs:
 
       - name: Merge with gh-pages
         run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git fetch origin gh-pages
-          git checkout gh-pages
-          git merge --no-ff ${{ github.sha }}
+          git checkout -b gh-pages
 
       - name: Clean and Copy Dist
         run: |
-          rm -r !("dist")
+          rm -rf public/
+          rm -rf src/
+          rm index.html
+          rm *.json
+          rm *.js
+          rm *.ts
           cp -r dist/* .
 
       - name: Commit and Push Changes
-        run: |
-          git add .
-          git commit -m "Build and deploy updates"
-          git push origin gh-pages
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Build'
+          branch: gh-pages
