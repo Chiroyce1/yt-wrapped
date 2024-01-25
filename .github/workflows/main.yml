@@ -1,0 +1,43 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main 
+      - workflow_dispatch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+    
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Merge with gh-pages
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          git merge --no-ff ${{ github.sha }}
+
+      - name: Clean and Copy Dist
+        run: |
+          rm -r !("dist")
+          cp -r dist/* .
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git commit -m "Build and deploy updates"
+          git push origin gh-pages
