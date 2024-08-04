@@ -6,7 +6,7 @@ import type {
 	MonthData,
 } from "./types";
 
-export const year = 2023;
+export const year = 2024;
 
 export function sortTopChannels(obj: TopChannels): TopChannels {
 	// Ty ChatGPT
