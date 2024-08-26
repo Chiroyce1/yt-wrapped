@@ -18,7 +18,11 @@ export function sortTopChannels(obj: TopChannels): TopChannels {
 	return Object.fromEntries(entries);
 }
 
-export function filterVideos(vids: Array<YouTubeVideo>): Array<YouTubeVideo> {
+export function filterVideos(
+	vids: Array<YouTubeVideo>,
+	startDate: string,
+	endDate: string
+): Array<YouTubeVideo> {
 	return vids.filter((obj) => {
 		// If it wasn't a watched video
 		if (!obj.activityControls?.includes("YouTube watch history")) return false;
@@ -27,8 +31,14 @@ export function filterVideos(vids: Array<YouTubeVideo>): Array<YouTubeVideo> {
 		if (obj.titleUrl) {
 			if (obj.titleUrl.includes("music.youtube.com")) return false;
 		}
-		// Not from {year}? BYE BYE
-		if (!(new Date(obj.time).getFullYear() === year)) return false;
+		const videoWatchedOn = new Date(obj.time);
+		// If the video was watched before the start date or after the end date
+		if (
+			videoWatchedOn < new Date(startDate) ||
+			videoWatchedOn > new Date(endDate)
+		) {
+			return false;
+		}
 		return true;
 	});
 }
@@ -83,7 +93,7 @@ export function processData(videos: Array<YouTubeVideo>): {
 	};
 }
 
-const monthMap = {
+export const monthMap = {
 	"01": "January",
 	"02": "February",
 	"03": "March",

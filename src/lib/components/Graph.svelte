@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Days, Stats } from "../types";
-	import Chart from 'chart.js/auto';
+	import Chart from "chart.js/auto";
 	import { onMount } from "svelte";
 	import { year } from "../data";
 	export let stats: Stats;
@@ -12,13 +12,13 @@
 		const graphData = {
 			line: {
 				x: stats.dates,
-				y: stats.videosOverYear
+				y: stats.videosOverYear,
 			},
 			bar: {
 				x: stats.dates,
-				y: stats.videosPerDay
-			}
-		}
+				y: stats.videosPerDay,
+			},
+		};
 
 		let lineChart = new Chart(ctxLine, {
 			type: "line",
@@ -33,7 +33,7 @@
 						fill: true,
 					},
 				],
-			}
+			},
 		});
 
 		// @ts-ignore
@@ -51,10 +51,29 @@
 						borderWidth: 1,
 					},
 				],
-			}
+			},
 		});
-	};
-	
+
+		// @ts-ignore
+		const line2ctx = document.getElementById("lineChart2").getContext("2d");
+		let line2 = new Chart(line2ctx, {
+			type: "line",
+			options: { elements: { line: { tension: 0.001 } } },
+			data: {
+				labels: graphData.bar.x,
+				datasets: [
+					{
+						label: "Videos Per Day",
+						data: graphData.bar.y,
+						backgroundColor: "rgba(75, 192, 192, 0.2)",
+						borderColor: "rgba(75, 192, 192, 1)",
+						borderWidth: 1,
+					},
+				],
+			},
+		});
+	}
+
 	onMount(createCharts);
 </script>
 
@@ -62,6 +81,8 @@
 <canvas id="lineChart" width="500" height="300"></canvas>
 <h2 class="gradient">Videos watched every day in {year}</h2>
 <canvas id="barChart" width="500" height="300"></canvas>
+<h2 class="gradient">Videos watched every day in {year}</h2>
+<canvas id="lineChart2" width="500" height="300"></canvas>
 
 <style>
 	canvas {

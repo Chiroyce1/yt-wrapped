@@ -4,6 +4,7 @@
 	import type { Stats } from "../types";
 	import { getStats, year, totalVideos, average } from "../data";
 	import Graph from "./Graph.svelte";
+	import App from "../../App.svelte";
 
 	export let data: any | undefined;
 	let stats: Stats | undefined;
@@ -17,10 +18,12 @@
 		return Math.floor(diff / oneDay);
 	}
 
+	let months = 1;
+
 	$: if (data) {
+		months = Math.max(1, Object.keys(data.days).length / 30);
 		stats = getStats(data.days);
-		console.log(data);
-		console.log(stats);
+		console.log(`updating with ${Object.keys(data.days).length} days`);
 	}
 </script>
 
@@ -30,15 +33,16 @@
 		- a total of <span class="gradient blue"
 			>{totalVideos(data.days).toLocaleString()}</span
 		>
-		videos in {year}
+		videos
 	</p>
 	<p class="data">
 		- an average of <span class="gradient yellow"
-			>{average(data.days, daysPassedThisYear())}</span
+			>{average(data.days, Object.keys(data.days).length)}</span
 		> videos in a day
 	</p>
 	<p class="data">
-		- an average of <span class="gradient purple">{average(data.days, 12)}</span
+		- an average of <span class="gradient purple"
+			>{average(data.days, months)}</span
 		> videos in a month
 	</p>
 	<p class="data">
