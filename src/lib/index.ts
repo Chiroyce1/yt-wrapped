@@ -106,7 +106,7 @@ export function parseData(videos: YouTubeVideo[]) {
 
 	console.info(`${yearVideos.length} videos in ${year}`);
 
-	const history: Video[] = yearVideos.map((video) => {
+	let history: Video[] = yearVideos.map((video) => {
 		const { titleUrl, subtitles, time } = video;
 		const title = video.title.split(" ").slice(1).join(" ");
 		const channel: Channel = {
@@ -115,8 +115,12 @@ export function parseData(videos: YouTubeVideo[]) {
 			icon: undefined,
 			videos: 0,
 		};
+
 		return { title, url: titleUrl, channel, time };
 	});
+
+	// remove all history items that have channel `?`
+	history = history.filter((video) => video.channel.name !== "?");
 
 	const songs = history.filter((video) => {
 		if (!video.url) {

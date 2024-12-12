@@ -16,7 +16,7 @@ function timeOfDay(hour: number) {
 
 export const st = [
 	{
-		stat: "Videos watched by day-of-week",
+		stat: "Videos watched throughout the week",
 		func: (timeStr: string) => {
 			const day = new Date(timeStr).getDay();
 			return [
@@ -29,20 +29,20 @@ export const st = [
 				"Saturday",
 			][day];
 		},
-		info: "You watch most of your videos on",
+		info: "You watch most videos on a",
 	},
 
 	{
-		stat: "Videos watched by time-of-day",
+		stat: "Videos watched throughout the day",
 		func: (timeStr: string) => {
 			const hour = new Date(timeStr).getHours();
 			return timeOfDay(hour);
 		},
-		info: "You watch most of your videos at",
+		info: "You watch most videos around",
 	},
 
 	{
-		stat: "Videos watched by tim",
+		stat: "Videos watched at different times",
 		func: (timeStr: string) => {
 			const hour = new Date(timeStr).getHours();
 			const formattedHour = `${hour % 12 || 12}${hour >= 12 ? "PM" : "AM"}`;
@@ -56,8 +56,31 @@ export const st = [
 				"Friday",
 				"Saturday",
 			][dayIndex];
-			return `${formattedHour} on ${day}`;
+			return `${formattedHour} on ${day}s`;
 		},
-		info: "You watch most of your videos on",
+		info: "You watched most videos at",
+	},
+
+	{
+		stat: "Videos watched by time",
+		func: (timeStr: string) => {
+			// return month
+			const month = new Date(timeStr).getMonth();
+			return [
+				"January",
+				"February",
+				"March",
+				"April",
+				"May",
+				"June",
+				"July",
+				"August",
+				"September",
+				"October",
+				"November",
+				"December",
+			][month];
+		},
+		info: "You watched most videos this year in",
 	},
 ];

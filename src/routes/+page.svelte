@@ -63,6 +63,9 @@
 
 			avg = getStats(stats.videos);
 
+			console.log(avg);
+			console.log(stats);
+
 			uniqueChannelUrls = uniqueChannelUrls
 				.map((url) => url?.split("/").pop())
 				.filter((url): url is string => !!url);
@@ -207,5 +210,8 @@
 		<div class="charts">
 			<Charts {stats} />
 		</div>
+		<p class="text-2xl">
+			<i>Come back tomorrow to see more stats (under development)...</i>
+		</p>
 	{/if}
 </main>

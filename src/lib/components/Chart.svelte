@@ -7,7 +7,6 @@
 	console.log(
 		`${stat} loaded with ${keys.length} keys and ${values.length} values`
 	);
-	console.log(keys, values);
 
 	const data = {
 		labels: keys, // y-axis labels (keys)
