@@ -12,22 +12,31 @@ export const POST: RequestHandler = async (req: RequestEvent) => {
 	const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelIDs}&key=${YOUTUBE_API_KEY}`;
 
 	const response = await fetch(url);
-	const data = await response.json();
-	let channels = data.items;
-	// extract the `id` and `snippet.thumbnails.high.url` from eahc channel
-	channels = channels.map((channel: any) => {
-		const { id, snippet } = channel;
-		const { thumbnails } = snippet;
-		const { high } = thumbnails;
-		const { url } = high;
-		return { id, url };
-	});
+	const text = await response.text();
+	try {
+		const data = JSON.parse(text);
+		let channels = data.items;
+		// extract the `id` and `snippet.thumbnails.high.url` from eahc channel
+		channels = channels.map((channel: any) => {
+			const { id, snippet } = channel;
+			const { thumbnails } = snippet;
+			const { high } = thumbnails;
+			const { url } = high;
+			return { id, url };
+		});
 
-	// convert to object with channel id as key and thumbnail url as value
-	channels = channels.reduce((acc: Record<string, string>, channel: any) => {
-		acc[channel.id] = channel.url;
-		return acc;
-	}, {});
+		// convert to object with channel id as key and thumbnail url as value
+		channels = channels.reduce((acc: Record<string, string>, channel: any) => {
+			acc[channel.id] = channel.url;
+			return acc;
+		}, {});
 
-	return json(channels);
+		return json(channels);
+	} catch (e: any) {
+		console.log(url);
+		console.log(response.status, response.statusText);
+		console.log(text);
+		console.error(e);
+		return json({ error: e.message }, { status: 500 });
+	}
 };

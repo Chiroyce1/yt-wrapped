@@ -16,7 +16,6 @@
 
 	const video = props.video;
 	const imgUrl = props.thumbnail;
-	console.log(video);
 </script>
 
 <div class="flex items-center shadow-md rounded-md p-4 bg-secondary">

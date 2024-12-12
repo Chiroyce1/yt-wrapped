@@ -49,3 +49,16 @@ export type Video = {
 	time: string;
 	channel: Channel;
 };
+
+export type Stats =
+	| {
+			videos: Video[];
+			songs: Video[];
+			topChannels: Channel[];
+			topArtists: Channel[];
+			topVideos: { channel: Channel; watched: number; video: Video }[];
+			topSongs: { channel: Channel; watched: number; video: Video }[];
+			uniqueArtists: string[];
+			uniqueChannels: string[];
+	  }
+	| undefined;
