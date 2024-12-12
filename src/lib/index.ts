@@ -118,13 +118,19 @@ export function parseData(videos: YouTubeVideo[]) {
 		return { title, url: titleUrl, channel, time };
 	});
 
-	const songs = history.filter((video) =>
-		video.url.includes("music.youtube.com")
-	);
+	const songs = history.filter((video) => {
+		if (!video.url) {
+			return false;
+		}
+		return video.url.includes("music.youtube.com");
+	});
 
-	const ytVideos = history.filter(
-		(video) => !video.url.includes("music.youtube.com")
-	);
+	const ytVideos = history.filter((video) => {
+		if (!video.url) {
+			return true;
+		}
+		return !video.url.includes("music.youtube.com");
+	});
 
 	const topChannels = sortByVideos(processTopChannels(ytVideos));
 	const topVideos = sortByWatched(processTopVideos(ytVideos));

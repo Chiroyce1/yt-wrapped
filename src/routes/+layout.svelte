@@ -9,9 +9,21 @@
 	<title>ytwrapped</title>
 
 	<meta name="description" content="ytwrapped" />
-	<meta name="keywords" content="yt" />
+	<link rel="shortcut icon" href="fav.png" type="image/png" />
+	<meta
+		name="description"
+		content="ytwrapped shows you the best of your 2024 YouTube watch history"
+	/>
+	<meta name="keywords" content="yt, youtube, wrapped, 2024, 2024 wrapped" />
 
-	<link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://ytwrapped.vercel.app" />
+	<meta property="og:title" content="ytwrapped" />
+	<meta
+		property="og:description"
+		content="ytwrapped shows you the best of your 2024 YouTube watch history"
+	/>
+	<meta property="og:image" content="/og.jpg" />
 </svelte:head>
 <ModeWatcher />
 

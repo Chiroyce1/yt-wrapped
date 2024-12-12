@@ -10,11 +10,8 @@
 		<a href="/" class="text-theme gradient">ytwrapped</a>
 	</h1>
 	<div class="self-end flex gap-2">
-		<a href="/stats" class="text-sm" title="stats">
-			<Button class="text-md" variant="link">Stats (404)</Button>
-		</a>
 		<a href="/privacy" class="text-sm" title="privacy">
-			<Button class="text-md" variant="link">Privacy (404)</Button>
+			<Button class="text-md" variant="link">Privacy</Button>
 		</a>
 
 		<span class="sm:ml-2"><Theme /></span>

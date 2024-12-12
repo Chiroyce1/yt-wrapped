@@ -21,9 +21,13 @@
 			throw new Error("No stats provided");
 		}
 		statList.forEach(({ stat, func, info }) => {
-			let { keys, values } = analyzeProperty(stats.videos, ["time"], func);
-			keys = keys.slice(0, 10);
-			values = values.slice(0, 10);
+			let { keys, values } = analyzeProperty(
+				stats.videos,
+				["time"],
+				func,
+				0,
+				10
+			);
 			data.push({ stat, keys, values, info });
 		});
 	}

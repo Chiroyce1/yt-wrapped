@@ -92,7 +92,7 @@
 		<div class="mx-auto grid lg:w-1/2 items-center gap-8">
 			<Label for="file" class="text-xl text-center"
 				>Upload your <code
-					class="mx-2 border-2 px-2 rounded-md border-secondary"
+					class="mx-1 border-2 px-2 py-1 rounded-md border-secondary"
 					>watch-history.json</code
 				> file</Label
 			>
@@ -103,9 +103,9 @@
 					class={cn(inputClass, "cursor-pointer")}
 					bind:files
 				/>
-				<Button>Unwrap it!</Button>
+				<Button>Generate</Button>
 			</div>
-			<Button href="/takeout" variant="link">How do I get it?</Button>
+			<Button href="/takeout" variant="link">How do I get the file?</Button>
 		</div>
 	{:else if stats && avg}
 		{#key images}
