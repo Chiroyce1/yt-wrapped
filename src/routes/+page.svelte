@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Button from "$lib/components/ui/button/button.svelte";
 	import { Label } from "$lib/components/ui/label/index.js";
-	import { cn, type Channel } from "$lib/utils";
+	import { cn } from "$lib/utils";
 	import { parseData, year, top, getStats } from "$lib/index";
-	import type { Video, Days, Stats } from "$lib/utils";
+	import type { Days, Stats } from "$lib/utils";
 	import ChannelCard from "$lib/components/ChannelCard.svelte";
 	import VideoCard from "$lib/components/VideoCard.svelte";
 	import Charts from "$lib/components/Charts.svelte";
@@ -91,7 +91,7 @@
 		YouTube Wrapped {year}
 	</h1>
 
-	{#if !files}
+	{#if !stats}
 		<div class="mx-auto grid lg:w-1/2 items-center gap-8">
 			<Label for="file" class="text-xl text-center"
 				>Upload your <code
@@ -106,7 +106,6 @@
 					class={cn(inputClass, "cursor-pointer")}
 					bind:files
 				/>
-				<Button>Generate</Button>
 			</div>
 			<Button href="/takeout" variant="link">How do I get the file?</Button>
 		</div>
@@ -127,7 +126,7 @@
 
 				<div class="text-3xl lg:text-4xl text-center w-full lg:w-1/2">
 					Listened to <span class="gradient yellow font-bold text-5xl"
-						>{stats.songs.length.toLocaleString()}
+						>{stats.uniqueSongs.length.toLocaleString()}
 					</span>
 					songs <br /> from
 					<span class="gradient purple font-bold text-5xl"

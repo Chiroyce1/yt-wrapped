@@ -60,5 +60,6 @@ export type Stats =
 			topSongs: { channel: Channel; watched: number; video: Video }[];
 			uniqueArtists: string[];
 			uniqueChannels: string[];
+			uniqueSongs: string[];
 	  }
 	| undefined;

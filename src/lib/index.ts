@@ -122,12 +122,14 @@ export function parseData(videos: YouTubeVideo[]) {
 	// remove all history items that have channel `?`
 	history = history.filter((video) => video.channel.name !== "?");
 
-	const songs = history.filter((video) => {
+	let songs = history.filter((video) => {
 		if (!video.url) {
 			return false;
 		}
 		return video.url.includes("music.youtube.com");
 	});
+
+	const uniqueSongs = Array.from(new Set(songs.map((song) => song.title)));
 
 	const ytVideos = history.filter((video) => {
 		if (!video.url) {
@@ -155,5 +157,6 @@ export function parseData(videos: YouTubeVideo[]) {
 
 		uniqueArtists,
 		uniqueChannels,
+		uniqueSongs,
 	};
 }
