@@ -21,7 +21,7 @@
 <div class="flex items-center shadow-md rounded-md p-4 bg-secondary">
 	<Avatar.Root class="h-16 w-16 shadow-lg">
 		<Avatar.Image src={imgUrl} alt={video.title} />
-		<Avatar.Fallback>{video.title}</Avatar.Fallback>
+		<Avatar.Fallback>{video.channel.name}</Avatar.Fallback>
 	</Avatar.Root>
 	<div class="ml-4 space-y-1">
 		<p class="text-xl font-medium leading-none">

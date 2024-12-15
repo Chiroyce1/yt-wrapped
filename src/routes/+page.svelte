@@ -49,6 +49,50 @@
 	const inputClass =
 		"border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
+	function loadImages() {
+		if (!stats) return;
+		let uniqueChannelUrls = [
+			...new Set([
+				...Object.entries(stats.topChannels.slice(0, top)).map(
+					([_, channel]) => channel.url
+				),
+				...Object.entries(stats.topVideos.slice(0, top)).map(
+					([_, video]) => video.channel.url
+				),
+				...Object.entries(stats.topSongs.slice(0, topSongs)).map(
+					([_, video]) => video.channel.url
+				),
+				...Object.entries(stats.topArtists.slice(0, topSongs)).map(
+					([_, channel]) => channel.url
+				),
+			]),
+		];
+
+		uniqueChannelUrls = uniqueChannelUrls
+			.map((url) => url?.split("/").pop())
+			.filter((url): url is string => !!url);
+
+		// filter channelURLs that are already in `images`
+		uniqueChannelUrls = uniqueChannelUrls.filter(
+			(url) => !Object.keys(images).includes(url)
+		);
+
+		console.info(`Fetching ${uniqueChannelUrls.length} images...`);
+
+		fetch("/api", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ channels: uniqueChannelUrls }),
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				images = { ...images, ...data };
+				setInterval(() => (images["a"] = Math.random().toString()), 1000);
+			});
+	}
+
 	function load() {
 		if (!files) {
 			console.warn("No files uploaded");
@@ -71,40 +115,7 @@
 			console.info(avg);
 			console.info(stats);
 
-			// get all unique channel urls from the top channels, top videos' channels and top songs' channels
-			let uniqueChannelUrls = [
-				...new Set([
-					...Object.entries(stats.topChannels.slice(0, top)).map(
-						([_, channel]) => channel.url
-					),
-					...Object.entries(stats.topVideos.slice(0, top)).map(
-						([_, video]) => video.channel.url
-					),
-					...Object.entries(stats.topSongs.slice(0, top)).map(
-						([_, video]) => video.channel.url
-					),
-					...Object.entries(stats.topArtists.slice(0, top)).map(
-						([_, channel]) => channel.url
-					),
-				]),
-			];
-
-			uniqueChannelUrls = uniqueChannelUrls
-				.map((url) => url?.split("/").pop())
-				.filter((url): url is string => !!url);
-
-			fetch("/api", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ channels: uniqueChannelUrls }),
-			})
-				.then((res) => res.json())
-				.then((data) => {
-					images = data;
-					setInterval(() => (images["a"] = Math.random().toString()), 1000);
-				});
+			loadImages();
 		});
 	}
 
@@ -197,16 +208,6 @@
 								thumbnail={images[channel.url.split("/").pop() || ""]}
 							/>
 						{/each}
-						<div class="flex gap-4 items-center">
-							<span class="text-md">Top count: </span>
-							<Input
-								type="number"
-								bind:value={top}
-								min="3"
-								max="50"
-								class="w-16"
-							/>
-						</div>
 					</div>
 					<div
 						class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
@@ -220,6 +221,14 @@
 						{/each}
 					</div>
 				</div>
+				<Button
+					class="text-center w-full lg:w-1/2"
+					onclick={() => {
+						top = top + 5;
+						loadImages();
+					}}
+					variant="secondary">Load more videos and channels</Button
+				>
 				<div class="flex items-center gap-2">
 					<Checkbox
 						id="terms"
@@ -248,16 +257,6 @@
 									thumbnail={images[video.channel.url.split("/").pop() || ""]}
 								/>
 							{/each}
-							<div class="flex gap-4 items-center">
-								<span class="text-md">Top count: </span>
-								<Input
-									type="number"
-									bind:value={topSongs}
-									min="3"
-									max="50"
-									class="w-16"
-								/>
-							</div>
 						</div>
 						<div
 							class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
@@ -271,6 +270,14 @@
 							{/each}
 						</div>
 					</div>
+					<Button
+						class="text-center w-full lg:w-1/2"
+						onclick={() => {
+							topSongs = topSongs + 5;
+							loadImages();
+						}}
+						variant="secondary">Load more songs and artists</Button
+					>
 				{/if}
 			{/key}
 		{/key}
