@@ -57,7 +57,7 @@
 		const file = files[0];
 		file.text().then((content) => {
 			const json = JSON.parse(content);
-			stats = parseData(json);
+			stats = parseData(json, year);
 			if (!stats) throw new Error("Invalid data");
 
 			console.info(`Loaded ${stats.videos.length} videos`);
@@ -279,7 +279,7 @@
 				<Charts {stats} />
 			{/key}
 		</div>
-		<p class="text-2xl">
+		<div class="flex gap-2">
 			<Button
 				onclick={() => {
 					year = year - 1;
@@ -287,9 +287,23 @@
 					load();
 					window.scrollTo({ top: 0, behavior: "smooth" });
 				}}
-				class="text-sky-500 text-2xl"
-				variant="secondary">Show my {year - 1} stats</Button
+				class="text-sky-500 text-xl"
+				variant="secondary">{year - 1} stats</Button
 			>
-		</p>
+			<Button class="text-green-500 text-xl" variant="secondary"
+				>{year} stats</Button
+			>
+			<Button
+				disabled={year + 1 > new Date().getFullYear()}
+				onclick={() => {
+					year = year + 1;
+					goto(`/?year=${year}`);
+					load();
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				}}
+				class="text-sky-500 text-xl"
+				variant="secondary">{year + 1} stats</Button
+			>
+		</div>
 	{/if}
 </main>

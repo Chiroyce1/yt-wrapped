@@ -4,7 +4,7 @@
 
 	let { keys, values, stat } = props;
 
-	console.log(
+	console.info(
 		`${stat} loaded with ${keys.length} keys and ${values.length} values`
 	);
 
