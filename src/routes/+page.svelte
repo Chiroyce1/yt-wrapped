@@ -1,15 +1,24 @@
 <script lang="ts">
 	import Button from "$lib/components/ui/button/button.svelte";
-	import { Label } from "$lib/components/ui/label/index.js";
 	import { cn } from "$lib/utils";
-	import { parseData, year, top, getStats } from "$lib/index";
+	import { parseData, defaultYear, defaultTop, getStats } from "$lib/index";
 	import type { Days, Stats } from "$lib/utils";
 	import ChannelCard from "$lib/components/ChannelCard.svelte";
 	import VideoCard from "$lib/components/VideoCard.svelte";
 	import Charts from "$lib/components/Charts.svelte";
+	import { onMount } from "svelte";
+	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
+	import { Label } from "$lib/components/ui/label/index.js";
+	import { goto } from "$app/navigation";
+	import Input from "$lib/components/ui/input/input.svelte";
 
+	// ================================================================ //
+	// ALL STATE VARIABLES
+	let year: number = $state(defaultYear);
+	let musicChecked: boolean = $state(false);
+	let top: number = $state(defaultTop);
+	let topSongs: number = $state(defaultTop);
 	let stats: Stats = $state();
-
 	let avg:
 		| {
 				avgPerDay: number;
@@ -20,13 +29,27 @@
 		| undefined = $state(undefined);
 
 	let images: Record<string, string> = $state({});
+	let files: FileList | undefined = $state();
+
+	// ================================================================ //
+
+	onMount(() => {
+		// RUN WHEN DOM LOADS
+		// set year to non-default if specified in query params
+		const searchParams = new URLSearchParams(location.search);
+		const yearParam = searchParams.get("year");
+		if (yearParam) year = parseInt(yearParam);
+		document.title = `YouTube Wrapped ${year}`;
+	});
+
+	function dummy(n: any) {
+		return n;
+	}
 
 	const inputClass =
 		"border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
-	let files: FileList | undefined = $state();
-
-	$effect(() => {
+	function load() {
 		if (!files) {
 			console.warn("No files uploaded");
 			return;
@@ -42,6 +65,11 @@
 			console.info(
 				`${stats.uniqueArtists.length} unique artists and ${stats.uniqueChannels.length} unique channels`
 			);
+
+			avg = getStats(stats.videos);
+
+			console.info(avg);
+			console.info(stats);
 
 			// get all unique channel urls from the top channels, top videos' channels and top songs' channels
 			let uniqueChannelUrls = [
@@ -61,11 +89,6 @@
 				]),
 			];
 
-			avg = getStats(stats.videos);
-
-			console.log(avg);
-			console.log(stats);
-
 			uniqueChannelUrls = uniqueChannelUrls
 				.map((url) => url?.split("/").pop())
 				.filter((url): url is string => !!url);
@@ -83,6 +106,11 @@
 					setInterval(() => (images["a"] = Math.random().toString()), 1000);
 				});
 		});
+	}
+
+	$effect(() => {
+		console.info(`Files:`, files);
+		if (files) load();
 	});
 </script>
 
@@ -153,64 +181,115 @@
 					videos every <span class="gradient font-bold">month</span>!
 				</div>
 			</div>
-			<div
-				class="TOPBAR w-full lg:w-4/5 flex flex-col lg:flex-row justify-center pt-4 px-4"
-			>
+
+			{#key top}
 				<div
-					class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
+					class="TOPBAR w-full lg:w-4/5 flex flex-col lg:flex-row justify-center pt-4 px-4"
 				>
-					<h1 class="text-4xl font-extrabold text-center">Top Channels</h1>
-					{#each stats.topChannels.slice(0, top) as channel}
-						<ChannelCard
-							{channel}
-							thumbnail={images[channel.url.split("/").pop() || ""]}
-						/>
-					{/each}
+					<div
+						class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
+					>
+						<h1 class="text-4xl font-extrabold text-center">Top Channels</h1>
+
+						{#each stats.topChannels.slice(0, top) as channel}
+							<ChannelCard
+								{channel}
+								thumbnail={images[channel.url.split("/").pop() || ""]}
+							/>
+						{/each}
+						<div class="flex gap-4 items-center">
+							<span class="text-md">Top count: </span>
+							<Input
+								type="number"
+								bind:value={top}
+								min="3"
+								max="50"
+								class="w-16"
+							/>
+						</div>
+					</div>
+					<div
+						class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
+					>
+						<h1 class="text-4xl font-extrabold text-center">Top Videos</h1>
+						{#each stats.topVideos.slice(0, top) as video}
+							<VideoCard
+								{video}
+								thumbnail={images[video.channel.url.split("/").pop() || ""]}
+							/>
+						{/each}
+					</div>
 				</div>
-				<div
-					class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
-				>
-					<h1 class="text-4xl font-extrabold text-center">Top Videos</h1>
-					{#each stats.topVideos.slice(0, top) as video}
-						<VideoCard
-							{video}
-							thumbnail={images[video.channel.url.split("/").pop() || ""]}
-						/>
-					{/each}
+				<div class="flex items-center gap-2">
+					<Checkbox
+						id="terms"
+						bind:checked={musicChecked}
+						aria-labelledby="terms-label"
+					/>
+					<Label
+						id="terms-label"
+						for="terms"
+						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						Show music stats
+					</Label>
 				</div>
-			</div>
-			<div
-				class="BOTTOMBAR w-full lg:w-4/5 flex flex-col lg:flex-row justify-center px-4"
-			>
-				<div
-					class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
-				>
-					<h1 class="text-4xl font-extrabold text-center">Top Songs</h1>
-					{#each stats.topSongs.slice(0, top) as video}
-						<VideoCard
-							{video}
-							thumbnail={images[video.channel.url.split("/").pop() || ""]}
-						/>
-					{/each}
-				</div>
-				<div
-					class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
-				>
-					<h1 class="text-4xl font-extrabold text-center">Top Artists</h1>
-					{#each stats.topArtists.slice(0, top) as channel}
-						<ChannelCard
-							{channel}
-							thumbnail={images[channel.url.split("/").pop() || ""]}
-						/>
-					{/each}
-				</div>
-			</div>
+				{#if musicChecked}
+					<div
+						class="BOTTOMBAR w-full lg:w-4/5 flex flex-col lg:flex-row justify-center px-4"
+					>
+						<div
+							class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
+						>
+							<h1 class="text-4xl font-extrabold text-center">Top Songs</h1>
+							{#each stats.topSongs.slice(0, topSongs) as video}
+								<VideoCard
+									{video}
+									thumbnail={images[video.channel.url.split("/").pop() || ""]}
+								/>
+							{/each}
+							<div class="flex gap-4 items-center">
+								<span class="text-md">Top count: </span>
+								<Input
+									type="number"
+									bind:value={topSongs}
+									min="3"
+									max="50"
+									class="w-16"
+								/>
+							</div>
+						</div>
+						<div
+							class="w-full lg:w-1/2 h-auto py-4 px-4 lg:px-8 rounded-lg space-y-4"
+						>
+							<h1 class="text-4xl font-extrabold text-center">Top Artists</h1>
+							{#each stats.topArtists.slice(0, topSongs) as channel}
+								<ChannelCard
+									{channel}
+									thumbnail={images[channel.url.split("/").pop() || ""]}
+								/>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			{/key}
 		{/key}
 		<div class="charts">
-			<Charts {stats} />
+			{#key year}
+				<Charts {stats} />
+			{/key}
 		</div>
 		<p class="text-2xl">
-			<i>Come back tomorrow to see more stats (under development)...</i>
+			<Button
+				onclick={() => {
+					year = year - 1;
+					goto(`/?year=${year}`);
+					load();
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				}}
+				class="text-sky-500 text-2xl"
+				variant="secondary">Show my {year - 1} stats</Button
+			>
 		</p>
 	{/if}
 </main>

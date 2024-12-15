@@ -7,8 +7,8 @@ import type {
 	YouTubeVideo,
 } from "./utils";
 
-export const year = 2024;
-export const top = 5;
+export const defaultYear = 2024;
+export const defaultTop = 5;
 
 /*
 example of a video object
@@ -90,7 +90,7 @@ export function getStats(videos: Video[]) {
 	};
 }
 
-export function parseData(videos: YouTubeVideo[]) {
+export function parseData(videos: YouTubeVideo[], year: number = defaultYear) {
 	const yearStart = new Date(year, 0, 1);
 	const yearEnd = new Date(year, 11, 31);
 	console.info(`Parsing ${videos.length} videos...`);

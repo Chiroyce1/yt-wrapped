@@ -15,8 +15,9 @@
 		"@sveltejs/kit": "^2.9.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"autoprefixer": "^10.4.20",
-		"bits-ui": "^1.0.0-next.71",
+		"bits-ui": "^1.0.0-next.72",
 		"clsx": "^2.1.1",
+		"lucide-svelte": "^0.468.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"tailwind-merge": "^2.5.5",
@@ -30,7 +31,6 @@
 		"@types/chart.js": "^2.9.41",
 		"@vercel/analytics": "^1.4.1",
 		"chart.js": "^4.4.7",
-		"lucide-svelte": "^0.468.0",
 		"mode-watcher": "^0.5.0"
 	}
 }
