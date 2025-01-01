@@ -14,7 +14,17 @@
 		}
 	}
 
-	const video = props.video;
+	let date = $state(false);
+	// svelte-ignore non_reactive_update
+	let video = props.video;
+	if (video.video) {
+		video = video.video;
+	}
+
+	if (props.date) {
+		date = true;
+	}
+
 	const imgUrl = props.thumbnail;
 </script>
 
@@ -25,14 +35,20 @@
 	</Avatar.Root>
 	<div class="ml-4 space-y-1">
 		<p class="text-xl font-medium leading-none">
-			<a href={video.video.url} target="_blank"
+			<a href={video.url} target="_blank"
 				><span class="flex items-center gap-2"
-					>{video.video.title}<ExternalLink size={14} /></span
+					>{video.title}<ExternalLink size={14} /></span
 				></a
 			>
 		</p>
 		<p class="text-muted-foreground text-sm">
-			{video.video.channel.name} · {formatNumber(video.watched || 1)} times
+			<!-- if video object in video -->
+			{video.channel.name} ·
+			{#if date}
+				{new Date(video.time).toLocaleTimeString()}
+			{:else}
+				· {formatNumber(video.watched || 1)} times
+			{/if}
 		</p>
 	</div>
 </div>

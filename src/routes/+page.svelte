@@ -10,7 +10,6 @@
 	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
 	import { goto } from "$app/navigation";
-	import Input from "$lib/components/ui/input/input.svelte";
 
 	// ================================================================ //
 	// ALL STATE VARIABLES

@@ -10,6 +10,10 @@
 		<a href="/" class="text-theme gradient">ytwrapped</a>
 	</h1>
 	<div class="self-end flex gap-2">
+		<a href="/history" class="text-sm" title="history">
+			<Button class="text-md" variant="link">History</Button>
+		</a>
+
 		<a href="/privacy" class="text-sm" title="privacy">
 			<Button class="text-md" variant="link">Privacy</Button>
 		</a>
