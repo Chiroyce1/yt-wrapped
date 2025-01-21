@@ -31,6 +31,7 @@
 			(url) => !Object.keys(images).includes(url)
 		);
 
+		if (uniqueChannelUrls.length === 0) return;
 		console.info(`Fetching ${uniqueChannelUrls.length} images...`);
 
 		fetch("/api", {
@@ -57,7 +58,7 @@
 		const file = files[0];
 		file.text().then((content) => {
 			const json = JSON.parse(content);
-			stats = parseData(json, year);
+			stats = parseData(json, new Date().getFullYear());
 			if (!stats) throw new Error("Invalid data");
 
 			console.info(`Loaded ${stats.videos.length} videos`);

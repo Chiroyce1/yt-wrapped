@@ -76,6 +76,7 @@
 			(url) => !Object.keys(images).includes(url)
 		);
 
+		if (uniqueChannelUrls.length === 0) return;
 		console.info(`Fetching ${uniqueChannelUrls.length} images...`);
 
 		fetch("/api", {
@@ -88,7 +89,9 @@
 			.then((res) => res.json())
 			.then((data) => {
 				images = { ...images, ...data };
-				setInterval(() => (images["a"] = Math.random().toString()), 1000);
+				setTimeout(() => {
+					images = { ...images, a: Math.random().toString() };
+				}, 1000);
 			});
 	}
 
