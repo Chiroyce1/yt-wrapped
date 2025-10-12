@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as Avatar from "$lib/components/ui/avatar/index";
-	import type { Video } from "$lib/utils";
 	import { ExternalLink } from "lucide-svelte";
 	let props = $props();
 
@@ -16,10 +15,10 @@
 
 	let date = $state(false);
 	// svelte-ignore non_reactive_update
-	let video = props.video;
-	if (video.video) {
-		video = video.video;
-	}
+	const videoData = props.video;
+	const nestedVideo = videoData?.video;
+	const video = nestedVideo ? nestedVideo : videoData;
+	const watchedCount = videoData?.watched ?? 1;
 
 	if (props.date) {
 		date = true;
@@ -47,7 +46,7 @@
 			{#if date}
 				{new Date(video.time).toLocaleTimeString()}
 			{:else}
-				· {formatNumber(video.watched || 1)} times
+				{formatNumber(watchedCount)} times
 			{/if}
 		</p>
 	</div>

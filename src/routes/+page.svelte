@@ -39,6 +39,7 @@
 		const yearParam = searchParams.get("year");
 		if (yearParam) year = parseInt(yearParam);
 		document.title = `YouTube Wrapped ${year}`;
+		console.log("[yt-wrap] app mounted", { year });
 	});
 
 	function dummy(n: any) {
@@ -76,8 +77,16 @@
 			(url) => !Object.keys(images).includes(url)
 		);
 
-		if (uniqueChannelUrls.length === 0) return;
-		console.info(`Fetching ${uniqueChannelUrls.length} images...`);
+		if (uniqueChannelUrls.length === 0) {
+			console.log("[yt-wrap] thumbnails already cached for current selection", {
+				totalCached: Object.keys(images).length,
+			});
+			return;
+		}
+		console.log("[yt-wrap] fetching thumbnails", {
+			requested: uniqueChannelUrls.length,
+			channels: uniqueChannelUrls,
+		});
 
 		fetch("/api", {
 			method: "POST",
@@ -86,43 +95,98 @@
 			},
 			body: JSON.stringify({ channels: uniqueChannelUrls }),
 		})
-			.then((res) => res.json())
+			.then((res) => {
+				if (!res.ok) {
+					console.log("[yt-wrap] thumbnail request failed", {
+						status: res.status,
+						statusText: res.statusText,
+					});
+				}
+				return res.json();
+			})
 			.then((data) => {
 				images = { ...images, ...data };
-				setTimeout(() => {
-					images = { ...images, a: Math.random().toString() };
-				}, 1000);
+				console.log("[yt-wrap] thumbnails stored", {
+					added: Object.keys(data ?? {}).length,
+					totalCached: Object.keys(images).length,
+				});
+			})
+			.catch((error) => {
+				console.log("[yt-wrap] thumbnail request crashed", { error });
 			});
 	}
 
-	function load() {
+	async function load() {
 		if (!files) {
-			console.warn("No files uploaded");
+			console.log("[yt-wrap] load aborted - no files present");
 			return;
 		}
 		const file = files[0];
-		file.text().then((content) => {
+		if (!file) {
+			console.log("[yt-wrap] load aborted - first file missing");
+			return;
+		}
+		console.log("[yt-wrap] processing file", {
+			name: file.name,
+			size: file.size,
+			type: file.type,
+			lastModified: file.lastModified,
+			year,
+		});
+
+		try {
+			const readStart = performance.now();
+			const content = await file.text();
+			console.log("[yt-wrap] file read complete", {
+				ms: Number((performance.now() - readStart).toFixed(2)),
+				sizeMb: Number((file.size / 1000 / 1000).toFixed(2)),
+			});
+
+			const parseStart = performance.now();
 			const json = JSON.parse(content);
 			stats = parseData(json, year);
-			if (!stats) throw new Error("Invalid data");
+			if (!stats) throw new Error("Invalid data returned from parseData");
+			console.log("[yt-wrap] parse complete", {
+				ms: Number((performance.now() - parseStart).toFixed(2)),
+				videos: stats.videos.length,
+				songs: stats.songs.length,
+				uniqueChannels: stats.uniqueChannels.length,
+				uniqueArtists: stats.uniqueArtists.length,
+				topChannels: stats.topChannels.length,
+				topVideos: stats.topVideos.length,
+				topSongs: stats.topSongs.length,
+				topArtists: stats.topArtists.length,
+			});
 
-			console.info(`Loaded ${stats.videos.length} videos`);
-			console.info(`Loaded ${stats.songs.length} songs`);
-			console.info(
-				`${stats.uniqueArtists.length} unique artists and ${stats.uniqueChannels.length} unique channels`
-			);
-
+			const statsStart = performance.now();
 			avg = getStats(stats.videos);
-
-			console.info(avg);
-			console.info(stats);
+			if (avg) {
+				console.log("[yt-wrap] aggregate stats ready", {
+					ms: Number((performance.now() - statsStart).toFixed(2)),
+					avgPerDay: Number(avg.avgPerDay.toFixed(2)),
+					avgPerMonth: Number(avg.avgPerMonth.toFixed(2)),
+					maxVideosInDay: avg.max,
+					daysTracked: Object.keys(avg.days).length,
+				});
+			}
 
 			loadImages();
-		});
+		} catch (error) {
+			console.log("[yt-wrap] data pipeline failed", { error, year });
+		}
 	}
 
 	$effect(() => {
-		console.info(`Files:`, files);
+		console.log("[yt-wrap] file input change detected", {
+			files: files
+				? Array.from(files).map((file) => ({
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						lastModified: file.lastModified,
+					}))
+				: [],
+		});
 		if (files) load();
 	});
 </script>
@@ -131,6 +195,34 @@
 	<h1 class="text-5xl lg:text-7xl text-center gradient red font-extrabold">
 		YouTube Wrapped {year}
 	</h1>
+
+	<div class="flex gap-2">
+		<Button
+			disabled={year - 1 < 2010}
+			onclick={() => {
+				year = year - 1;
+				goto(`/?year=${year}`);
+				load();
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			}}
+			class="text-sky-500 text-xl"
+			variant="secondary">{year - 1} stats</Button
+		>
+		<Button class="text-green-500 text-xl" variant="secondary"
+			>{year} stats</Button
+		>
+		<Button
+			disabled={year + 1 > new Date().getFullYear()}
+			onclick={() => {
+				year = year + 1;
+				goto(`/?year=${year}`);
+				load();
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			}}
+			class="text-sky-500 text-xl"
+			variant="secondary">{year + 1} stats</Button
+		>
+	</div>
 
 	{#if !stats}
 		<div class="mx-auto grid lg:w-1/2 items-center gap-8">
@@ -144,6 +236,7 @@
 				<input
 					id="file"
 					type="file"
+					accept=".json,application/json"
 					class={cn(inputClass, "cursor-pointer")}
 					bind:files
 				/>
@@ -287,32 +380,6 @@
 			{#key year}
 				<Charts {stats} />
 			{/key}
-		</div>
-		<div class="flex gap-2">
-			<Button
-				onclick={() => {
-					year = year - 1;
-					goto(`/?year=${year}`);
-					load();
-					window.scrollTo({ top: 0, behavior: "smooth" });
-				}}
-				class="text-sky-500 text-xl"
-				variant="secondary">{year - 1} stats</Button
-			>
-			<Button class="text-green-500 text-xl" variant="secondary"
-				>{year} stats</Button
-			>
-			<Button
-				disabled={year + 1 > new Date().getFullYear()}
-				onclick={() => {
-					year = year + 1;
-					goto(`/?year=${year}`);
-					load();
-					window.scrollTo({ top: 0, behavior: "smooth" });
-				}}
-				class="text-sky-500 text-xl"
-				variant="secondary">{year + 1} stats</Button
-			>
 		</div>
 	{/if}
 </main>
