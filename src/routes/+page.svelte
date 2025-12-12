@@ -9,7 +9,6 @@
 	import { onMount } from "svelte";
 	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
-	import { goto } from "$app/navigation";
 
 	// ================================================================ //
 	// ALL STATE VARIABLES
@@ -29,17 +28,53 @@
 
 	let images: Record<string, string> = $state({});
 	let files: FileList | undefined = $state();
+	let lastLoadedFileKey: string | undefined;
 
 	// ================================================================ //
 
+	function getYearFromHash() {
+		if (typeof window === "undefined") return undefined;
+		const hash = window.location.hash.replace(/^#/, "");
+		if (!hash) return undefined;
+		const parsed = parseInt(hash, 10);
+		return Number.isNaN(parsed) ? undefined : parsed;
+	}
+
+	function syncUrlWithYear(currentYear: number) {
+		if (typeof window === "undefined") return;
+		const { pathname } = window.location;
+		window.history.replaceState(null, "", `${pathname}#${currentYear}`);
+	}
+
+	function updateYear(nextYear: number) {
+		year = nextYear;
+		syncUrlWithYear(nextYear);
+		if (typeof document !== "undefined") {
+			document.title = `YouTube Wrapped ${nextYear}`;
+		}
+		load();
+	}
+
 	onMount(() => {
 		// RUN WHEN DOM LOADS
-		// set year to non-default if specified in query params
-		const searchParams = new URLSearchParams(location.search);
-		const yearParam = searchParams.get("year");
-		if (yearParam) year = parseInt(yearParam);
+		const hashYear = getYearFromHash();
+		if (typeof hashYear === "number") {
+			year = hashYear;
+		}
+		syncUrlWithYear(year);
 		document.title = `YouTube Wrapped ${year}`;
 		console.log("[yt-wrap] app mounted", { year });
+
+		const handleHashChange = () => {
+			const next = getYearFromHash();
+			if (typeof next === "number" && next !== year) {
+				updateYear(next);
+			}
+		};
+		window.addEventListener("hashchange", handleHashChange);
+		return () => {
+			window.removeEventListener("hashchange", handleHashChange);
+		};
 	});
 
 	function dummy(n: any) {
@@ -117,6 +152,7 @@
 	}
 
 	async function load() {
+		const start = performance.now();
 		if (!files) {
 			console.log("[yt-wrap] load aborted - no files present");
 			return;
@@ -135,19 +171,15 @@
 		});
 
 		try {
-			const readStart = performance.now();
 			const content = await file.text();
 			console.log("[yt-wrap] file read complete", {
-				ms: Number((performance.now() - readStart).toFixed(2)),
 				sizeMb: Number((file.size / 1000 / 1000).toFixed(2)),
 			});
 
-			const parseStart = performance.now();
 			const json = JSON.parse(content);
 			stats = parseData(json, year);
 			if (!stats) throw new Error("Invalid data returned from parseData");
 			console.log("[yt-wrap] parse complete", {
-				ms: Number((performance.now() - parseStart).toFixed(2)),
 				videos: stats.videos.length,
 				songs: stats.songs.length,
 				uniqueChannels: stats.uniqueChannels.length,
@@ -158,11 +190,9 @@
 				topArtists: stats.topArtists.length,
 			});
 
-			const statsStart = performance.now();
 			avg = getStats(stats.videos);
 			if (avg) {
 				console.log("[yt-wrap] aggregate stats ready", {
-					ms: Number((performance.now() - statsStart).toFixed(2)),
 					avgPerDay: Number(avg.avgPerDay.toFixed(2)),
 					avgPerMonth: Number(avg.avgPerMonth.toFixed(2)),
 					maxVideosInDay: avg.max,
@@ -174,6 +204,11 @@
 		} catch (error) {
 			console.log("[yt-wrap] data pipeline failed", { error, year });
 		}
+		console.log(
+			`[yt-wrap] LOAD COMPLETE for ${year} in ${Number(
+				(performance.now() - start).toFixed(2)
+			)} ms`
+		);
 	}
 
 	$effect(() => {
@@ -187,7 +222,22 @@
 					}))
 				: [],
 		});
-		if (files) load();
+		if (!files || files.length === 0) {
+			lastLoadedFileKey = undefined;
+			return;
+		}
+		const first = files[0];
+		const nextKey = `${first.name}:${first.size}:${first.lastModified}`;
+		if (nextKey === lastLoadedFileKey) {
+			console.log("[yt-wrap] load skipped - file unchanged", { nextKey });
+			return;
+		}
+		lastLoadedFileKey = nextKey;
+		load();
+	});
+
+	$effect(() => {
+		console.log(year, stats);
 	});
 </script>
 
@@ -196,14 +246,13 @@
 		YouTube Wrapped {year}
 	</h1>
 
-	<div class="flex gap-2">
+	<div
+		class="fixed w-2xl mx-auto top-6 z-30 bg-background p-2 rounded-md shadow-md flex gap-4 bg-blur-sm"
+	>
 		<Button
 			disabled={year - 1 < 2010}
 			onclick={() => {
-				year = year - 1;
-				goto(`/?year=${year}`);
-				load();
-				window.scrollTo({ top: 0, behavior: "smooth" });
+				updateYear(year - 1);
 			}}
 			class="text-sky-500 text-xl"
 			variant="secondary">{year - 1} stats</Button
@@ -214,10 +263,7 @@
 		<Button
 			disabled={year + 1 > new Date().getFullYear()}
 			onclick={() => {
-				year = year + 1;
-				goto(`/?year=${year}`);
-				load();
-				window.scrollTo({ top: 0, behavior: "smooth" });
+				updateYear(year + 1);
 			}}
 			class="text-sky-500 text-xl"
 			variant="secondary">{year + 1} stats</Button
@@ -377,9 +423,7 @@
 			{/key}
 		{/key}
 		<div class="charts">
-			{#key year}
-				<Charts {stats} />
-			{/key}
+			<Charts {stats} />
 		</div>
 	{/if}
 </main>
